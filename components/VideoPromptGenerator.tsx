@@ -98,8 +98,8 @@ export const VideoPromptGenerator: React.FC = () => {
     };
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-12 h-full bg-gray-900">
-            <aside className="lg:col-span-4 p-4 border-r border-gray-800 overflow-y-auto h-full">
+        <div className="grid grid-cols-1 lg:grid-cols-12 h-full bg-gray-900 overflow-y-auto">
+            <aside className="lg:col-span-4 p-4 border-r border-gray-800 lg:overflow-y-auto lg:h-full">
                 <div className="space-y-6">
                     <header>
                         <h1 className="text-xl font-bold text-white">{t('videoPromptTitle')}</h1>
@@ -141,7 +141,7 @@ export const VideoPromptGenerator: React.FC = () => {
                     {error && <p className="text-center text-sm text-red-400 bg-red-900/30 p-2 rounded-md">{error}</p>}
                 </div>
             </aside>
-            <main className="lg:col-span-8 bg-black p-4 md:p-8 overflow-y-auto h-full flex flex-col">
+            <main className="lg:col-span-8 bg-black p-4 md:p-8 lg:overflow-y-auto lg:h-full flex flex-col">
                  <h2 className="text-lg font-semibold text-gray-300 mb-4">{t('generatedPromptTitle')}</h2>
                  <div className="flex-grow bg-gray-800/50 rounded-lg p-1 relative flex flex-col">
                     {generatedPrompt ? (
