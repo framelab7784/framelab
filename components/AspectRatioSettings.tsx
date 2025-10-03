@@ -95,7 +95,7 @@ export const AspectRatioSettings: React.FC = () => {
   }, [generatedImage, selectedAspectRatio]);
   
   return (
-    <div className="flex flex-col lg:flex-row bg-gray-900 font-sans h-full">
+    <div className="flex flex-col lg:flex-row bg-gray-900 font-sans h-full overflow-y-auto">
       {/* Control Panel */}
       <aside className="w-full lg:w-[450px] lg:min-w-[450px] bg-gray-800/50 backdrop-blur-sm lg:h-full lg:overflow-y-auto p-6 lg:p-8 space-y-8 border-r border-gray-700/50">
         <header>
