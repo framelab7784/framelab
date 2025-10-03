@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import './index.css'; // Import custom styles
 import { LanguageProvider } from './contexts/LanguageContext';
 import { ApiKeyProvider } from './contexts/ApiKeyContext';
 import { AuthProvider } from './contexts/AuthContext';
