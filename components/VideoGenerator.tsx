@@ -39,12 +39,12 @@ const VideoGenerator: React.FC = () => {
   const { apiKey, isApiKeySet } = useApiKey();
   const [scenes, setScenes] = useState<Scene[]>([{ id: Date.now(), prompt: '', usePreviousScene: false, isJsonPrompt: false }]);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
-  const [aspectRatio, setAspectRatio] = useState<AspectRatio>('16:9');
+  const [aspectRatio, setAspectRatio] = useState<AspectRatio>('9:16');
   const [enableSound, setEnableSound] = useState<boolean>(true);
-  const [resolution, setResolution] = useState<Resolution>('720p');
+  const [resolution, setResolution] = useState<Resolution>('1080p');
   const [veoModel, setVeoModel] = useState<VeoModel>('veo-3.0-generate-preview');
   const [visualStyle, setVisualStyle] = useState<VisualStyle>('Cinematic');
-  const [characterVoice, setCharacterVoice] = useState<CharacterVoice>('none');
+  const [characterVoice, setCharacterVoice] = useState<CharacterVoice>('bahasa-indonesia');
   
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isStopping, setIsStopping] = useState<boolean>(false);
@@ -103,12 +103,12 @@ const VideoGenerator: React.FC = () => {
   const clearProject = useCallback(() => {
     setScenes([{ id: Date.now(), prompt: '', usePreviousScene: false, isJsonPrompt: false }]);
     setImageFiles([]);
-    setAspectRatio('16:9');
+    setAspectRatio('9:16');
     setEnableSound(true);
-    setResolution('720p');
+    setResolution('1080p');
     setVeoModel('veo-3.0-generate-preview');
     setVisualStyle('Cinematic');
-    setCharacterVoice('none');
+    setCharacterVoice('bahasa-indonesia');
     setError(null);
     setOutputs([]);
   }, []);

@@ -103,9 +103,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           setSession(null);
           localStorage.removeItem(SESSION_ID_STORAGE_KEY);
         } else if (event === 'TOKEN_REFRESHED') {
-          // Validasi ulang sesi jika token diperbarui, untuk menangani login dari perangkat lain
+          // A token refresh event was received. This means the user is still active.
+          // We update the session in our state, then run our custom verification logic.
+          // If verification fails, it will trigger a logout, and the SIGNED_OUT event handler will clear the state.
           if (session) {
-             await verifySession();
+            setSession(session);
+            setUser(session.user);
+            await verifySession();
           }
         }
         // Event SIGNED_IN sengaja diabaikan di sini karena ditangani secara manual oleh fungsi login

@@ -8,6 +8,7 @@ import { createAspectRatioCanvas } from '../utils/aspectRatioCanvases';
 import type { ImageInput } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useApiKey } from '../contexts/ApiKeyContext';
+import Button from './Button';
 
 const ASPECT_RATIO_OPTIONS = [
   { value: '16:9', label: '16:9 (Widescreen)' },
@@ -123,7 +124,7 @@ export const AspectRatioSettings: React.FC = () => {
                     onClick={() => setSelectedAspectRatio(option.value)}
                     className={`px-3 py-2 text-sm font-semibold rounded-md transition-colors duration-200 ${
                       selectedAspectRatio === option.value
-                        ? 'bg-indigo-600 text-white'
+                        ? 'bg-lime-500 text-gray-900'
                         : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                     }`}
                   >
@@ -135,41 +136,32 @@ export const AspectRatioSettings: React.FC = () => {
         </div>
 
         <div className="pt-4">
-          <button
+          <Button
             onClick={handleGenerate}
             disabled={!isApiKeySet || !mainImage || isLoading}
-            className="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2 hover:bg-indigo-500 transition-all duration-300 disabled:bg-gray-600 disabled:cursor-not-allowed"
+            className="w-full"
             title={!isApiKeySet ? t('apiKeyMissingError') : ''}
           >
             {isLoading ? <><Spinner /> {t('generating')}...</> : <><SparklesIcon className="w-5 h-5" /> {t('changeAspectRatioButton')}</>}
-          </button>
+          </Button>
         </div>
       </aside>
 
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col items-center justify-center p-6 lg:p-12">
         <div className="w-full h-full max-w-5xl max-h-[85vh] bg-gray-800/30 rounded-2xl border-2 border-dashed border-gray-700 flex items-center justify-center relative overflow-hidden group">
-          {isLoading && (
+          {isLoading ? (
             <div className="z-10 absolute inset-0 bg-black/50 backdrop-blur-md flex flex-col items-center justify-center gap-4 text-white">
               <Spinner className="w-12 h-12" />
               <p className="text-lg font-medium">{t('expandingImage')}</p>
               <p className="text-sm text-gray-400">{t('takeAMoment')}</p>
             </div>
-          )}
-          {error && !isLoading && (
+          ) : error ? (
             <div className="text-center text-red-400 p-8">
               <h3 className="text-xl font-semibold mb-2">{t('generationFailed')}</h3>
               <p>{error}</p>
             </div>
-          )}
-          {!generatedImage && !isLoading && !error && (
-            <div className="text-center text-gray-500 p-8">
-              <SparklesIcon className="w-16 h-16 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-gray-300">{t('expandCanvasTitle')}</h2>
-              <p className="mt-2">{t('expandCanvasSubtitle')}</p>
-            </div>
-          )}
-          {generatedImage && (
+          ) : generatedImage ? (
             <>
               <img
                 src={generatedImage}
@@ -179,7 +171,7 @@ export const AspectRatioSettings: React.FC = () => {
                <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <button
                       onClick={() => setIsPreviewOpen(true)}
-                      className="bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg flex items-center justify-center gap-2 hover:bg-indigo-500 transition-all duration-300"
+                      className="bg-lime-500 text-gray-900 font-semibold py-2 px-4 rounded-lg flex items-center justify-center gap-2 hover:bg-lime-400 transition-all duration-300"
                   >
                       <MagnifyingGlassIcon className="w-5 h-5" />
                       {t('preview')}
@@ -187,12 +179,18 @@ export const AspectRatioSettings: React.FC = () => {
               </div>
               <button
                 onClick={handleDownload}
-                className="absolute bottom-6 right-6 bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg flex items-center justify-center gap-2 hover:bg-indigo-500 transition-all duration-300"
+                className="absolute bottom-6 right-6 bg-lime-500 text-gray-900 font-semibold py-2 px-4 rounded-lg flex items-center justify-center gap-2 hover:bg-lime-400 transition-all duration-300"
               >
                 <DownloadIcon className="w-5 h-5" />
                 {t('download')}
               </button>
             </>
+          ) : (
+            <div className="text-center text-gray-500 p-8">
+              <SparklesIcon className="w-16 h-16 mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-gray-300">{t('expandCanvasTitle')}</h2>
+              <p className="mt-2">{t('expandCanvasSubtitle')}</p>
+            </div>
           )}
         </div>
       </main>
