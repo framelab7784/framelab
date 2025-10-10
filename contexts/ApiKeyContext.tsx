@@ -19,33 +19,24 @@ export const ApiKeyProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     return key.toUpperCase().includes('PLACEHOLDER');
   };
 
-  // Logika inisialisasi yang diperbarui untuk menangani kedua lingkungan (AI Studio & Vercel)
+  // Logika inisialisasi yang disederhanakan: HANYA mengambil dari backend.
   const initializeApiKey = useCallback(async () => {
     setIsInitializing(true);
 
-    // Prioritas #1: Cek environment variable di frontend (untuk AI Studio)
-    // `process.env.API_KEY` disediakan oleh lingkungan build/dev seperti AI Studio
-    const envApiKey = process.env.API_KEY;
-    if (envApiKey && !isPlaceholderKey(envApiKey)) {
-        setApiKeyState(envApiKey);
-        setIsInitializing(false);
-        return; // Kunci ditemukan, tidak perlu mengambil dari backend
-    }
-
-    // Prioritas #2: Jika tidak ada di env frontend, ambil dari backend (untuk Vercel)
     try {
       const response = await fetch('/api/get-api-key');
       if (response.ok) {
         const data = await response.json();
         if (data.apiKey && !isPlaceholderKey(data.apiKey)) {
           setApiKeyState(data.apiKey);
+        } else {
+          console.error('Kunci API yang diterima dari backend kosong atau merupakan placeholder.');
         }
       } else {
         console.error('Gagal mengambil kunci API default dari backend:', response.status, response.statusText);
       }
     } catch (error) {
-      // Menangkap error jaringan saat fetch. Diharapkan terjadi di lingkungan dev murni.
-      console.log('Tidak dapat mengambil kunci API dari backend (diharapkan di lingkungan dev tanpa server).');
+      console.error('Error saat mengambil kunci API dari backend:', error);
     } finally {
       setIsInitializing(false);
     }
