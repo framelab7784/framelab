@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useApiKey } from '../contexts/ApiKeyContext';
-import { SettingsIcon, CheckCircleIcon, ExclamationCircleIcon } from './icons';
+import { SettingsIcon, CheckCircleIcon, ExclamationCircleIcon, EyeIcon, EyeOffIcon } from './icons';
 import Button from './Button';
 import { validateApiKey } from '../services/geminiService';
 import { Spinner } from './Spinner';
@@ -15,30 +15,24 @@ type ValidationStatus = 'idle' | 'testing' | 'valid' | 'invalid';
 
 const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
   const { t } = useLanguage();
-  const { apiKey, setApiKey } = useApiKey();
+  // FIX: Removed `setApiKey` as it's no longer provided by the `ApiKeyContext` to prevent direct user modification of the key.
+  const { apiKey } = useApiKey();
   const [localApiKey, setLocalApiKey] = useState(apiKey);
-  const [showSuccess, setShowSuccess] = useState(false);
   const [validationStatus, setValidationStatus] = useState<ValidationStatus>('idle');
+  const [isKeyVisible, setIsKeyVisible] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
 
   useEffect(() => {
     setLocalApiKey(apiKey);
     // Reset validation status when modal is opened or key changes
     setValidationStatus('idle');
+    setIsKeyVisible(false); // Hide key when modal opens
   }, [apiKey, isOpen]);
 
   useEffect(() => {
     // Reset validation status if the user modifies the key after testing
     setValidationStatus('idle');
   }, [localApiKey]);
-
-  const handleSave = () => {
-    setApiKey(localApiKey);
-    setShowSuccess(true);
-    setTimeout(() => {
-        setShowSuccess(false);
-        onClose();
-    }, 1500);
-  };
 
   const handleTestKey = async () => {
     if (!localApiKey) {
@@ -48,6 +42,14 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
     setValidationStatus('testing');
     const isValid = await validateApiKey(localApiKey);
     setValidationStatus(isValid ? 'valid' : 'invalid');
+  };
+
+  const handleCopyKey = () => {
+    if (localApiKey) {
+        navigator.clipboard.writeText(localApiKey);
+        setCopySuccess(true);
+        setTimeout(() => setCopySuccess(false), 2000);
+    }
   };
 
   const renderValidationStatus = () => {
@@ -104,36 +106,45 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
               </label>
               <div className="relative">
                 <input 
-                  type="password"
+                  type={isKeyVisible ? 'text' : 'password'}
                   id="api-key-input"
                   value={localApiKey}
                   onChange={(e) => setLocalApiKey(e.target.value)}
                   placeholder={t('apiKeyPlaceholder')}
-                  className="w-full bg-gray-900/80 border border-gray-700 text-white rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-lime-500 focus:border-lime-500 transition"
+                  className="w-full bg-gray-900/80 border border-gray-700 text-white rounded-lg py-2 pl-3 pr-10 focus:outline-none focus:ring-2 focus:ring-lime-500 focus:border-lime-500 transition"
                 />
+                <button 
+                    type="button"
+                    onClick={() => setIsKeyVisible(!isKeyVisible)}
+                    className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-white"
+                >
+                    {isKeyVisible ? <EyeOffIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
+                </button>
               </div>
               <div className="h-6 mt-2 flex items-center">
                   {renderValidationStatus()}
               </div>
             </div>
 
-            <div className="pt-2 flex items-center gap-3">
-                 <Button onClick={handleSave} className="w-full">
-                    {t('saveButton')}
-                 </Button>
-                 <Button 
+            {/* FIX: Removed the "Save" button and related logic, as the API key is no longer user-configurable. */}
+            <div className="pt-4 flex items-center gap-3">
+                <Button 
                     variant="secondary" 
                     onClick={handleTestKey} 
                     className="w-full" 
-                    disabled={validationStatus === 'testing'}
-                 >
+                    disabled={validationStatus === 'testing' || !localApiKey}
+                >
                     {t('testApiKeyButton')}
-                 </Button>
+                </Button>
+                <Button 
+                    variant="secondary" 
+                    onClick={handleCopyKey} 
+                    className="w-full" 
+                    disabled={!localApiKey}
+                >
+                    {copySuccess ? t('apiKeyCopied') : t('copyApiKeyButton')}
+                </Button>
             </div>
-
-            {showSuccess && (
-                <p className="text-center text-sm text-lime-400 mt-2">{t('apiKeySaved')}</p>
-            )}
         </div>
       </div>
     </div>

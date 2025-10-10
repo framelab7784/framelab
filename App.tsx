@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from './contexts/LanguageContext';
 import { useAuth } from './contexts/AuthContext'; // Import useAuth
+import { useApiKey } from './contexts/ApiKeyContext';
 import { LanguageSwitcher } from './components/LanguageSwitcher';
 import VideoGenerator from './components/VideoGenerator';
 import type { Tab } from './types';
-import SettingsModal from './components/SettingsModal';
 import ImageEditor from './components/ImageEditor';
-import { SettingsIcon, AspectRatioIcon, LightbulbIcon } from './components/icons';
+import { AspectRatioIcon, LightbulbIcon } from './components/icons';
 import { VideoPromptGenerator } from './components/VideoPromptGenerator';
 import AuthModal from './components/AuthModal'; // Import AuthModal
 import { Spinner } from './components/Spinner';
@@ -42,9 +42,9 @@ const TabButton = ({ label, icon, isActive, onClick }: { label: string, icon: Re
 
 export default function App() {
   const { t } = useLanguage();
-  const { user, loading, logout, verifySession } = useAuth(); // Get user and loading state from AuthContext
+  const { user, loading: authLoading, logout, verifySession } = useAuth(); // Get user and loading state from AuthContext
+  const { isInitializing: apiKeyInitializing } = useApiKey();
   const [activeTab, setActiveTab] = useState<Tab>('videoGenerator');
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // Efek untuk verifikasi sesi secara berkala
   useEffect(() => {
@@ -60,6 +60,8 @@ export default function App() {
     // Membersihkan interval saat komponen dilepas atau pengguna berubah
     return () => clearInterval(intervalId);
   }, [user, verifySession]);
+
+  const loading = authLoading || apiKeyInitializing;
 
   if (loading) {
     return (
@@ -82,8 +84,7 @@ export default function App() {
             </div>
             <div className="flex flex-col">
               <h1 className="text-md font-bold text-white leading-tight">
-                  Frame Lab
-                  <span className="text-xs ml-2 font-mono bg-gray-700 px-1.5 py-0.5 rounded">1.0</span>
+                  Frame Lab V.1.5
               </h1>
               <p className="text-xs text-gray-500 font-mono leading-tight">Modified by.FYAN.IT</p>
             </div>
@@ -91,13 +92,6 @@ export default function App() {
         <div className="flex items-center gap-2">
             <p className="text-xs text-gray-400 hidden sm:block">{user.email}</p>
             <LanguageSwitcher />
-            <button
-                onClick={() => setIsSettingsOpen(true)}
-                className="p-2 rounded-md text-gray-400 bg-gray-800/80 hover:bg-gray-700/80 hover:text-white transition-colors"
-                aria-label="Settings"
-            >
-                <SettingsIcon className="w-5 h-5" />
-            </button>
              <button
                 onClick={() => logout()}
                 className="p-2 rounded-md text-gray-400 bg-red-800/40 hover:bg-red-700/60 hover:text-white transition-colors"
@@ -140,8 +134,6 @@ export default function App() {
           <VideoPromptGenerator />
         </div>
       </div>
-
-      <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
     </div>
   );
 }

@@ -42,7 +42,7 @@ const VideoGenerator: React.FC = () => {
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>('9:16');
   const [enableSound, setEnableSound] = useState<boolean>(true);
   const [resolution, setResolution] = useState<Resolution>('1080p');
-  const [veoModel, setVeoModel] = useState<VeoModel>('veo-3.0-generate-preview');
+  const [veoModel, setVeoModel] = useState<VeoModel>('veo-3.0-fast-generate-preview');
   const [visualStyle, setVisualStyle] = useState<VisualStyle>('Cinematic');
   const [characterVoice, setCharacterVoice] = useState<CharacterVoice>('bahasa-indonesia');
   
@@ -51,14 +51,6 @@ const VideoGenerator: React.FC = () => {
   const stopRequested = useRef(false);
   const [error, setError] = useState<string | null>(null);
   const [outputs, setOutputs] = useState<Output[]>([]);
-
-  const isVeo3 = veoModel.startsWith('veo-3.0');
-
-  useEffect(() => {
-    if (!isVeo3) {
-      setCharacterVoice('none');
-    }
-  }, [isVeo3]);
 
   useEffect(() => {
     if (veoModel === 'veo-2.0-generate-001') {
@@ -106,7 +98,7 @@ const VideoGenerator: React.FC = () => {
     setAspectRatio('9:16');
     setEnableSound(true);
     setResolution('1080p');
-    setVeoModel('veo-3.0-generate-preview');
+    setVeoModel('veo-3.0-fast-generate-preview');
     setVisualStyle('Cinematic');
     setCharacterVoice('bahasa-indonesia');
     setError(null);
@@ -224,22 +216,17 @@ const VideoGenerator: React.FC = () => {
       <aside className="lg:col-span-3 bg-gray-900 p-4 border-r border-gray-800 overflow-y-auto h-full">
         <form onSubmit={handleSubmit} className="space-y-6 flex flex-col h-full">
           <fieldset disabled={isLoading} className="space-y-6 flex-grow">
-             <div className="flex items-center gap-2">
-                <SelectInput<VeoModel>
-                  label={t('veoModelLabel')}
-                  value={veoModel}
-                  onChange={setVeoModel}
-                  options={[
-                    { value: 'veo-3.0-generate-preview', label: 'veo-3.0-generate-preview' },
-                    { value: 'veo-3.0-generate-001', label: 'veo-3.0-generate-001' },
-                    { value: 'veo-3.0-fast-generate-001', label: 'veo-3.0-fast-generate-001' },
-                    { value: 'veo-2.0-generate-001', label: 'veo-2.0-generate-001' },
-                  ]}
-                />
-                {isVeo3 && <span className="mt-7 bg-lime-500/20 text-lime-300 text-xs font-bold px-2 py-1 rounded-full">NEW</span>}
-            </div>
+            <SelectInput<VeoModel>
+                label={t('veoModelLabel')}
+                value={veoModel}
+                onChange={setVeoModel}
+                options={[
+                    { value: 'veo-3.0-fast-generate-preview', label: 'VEO 3.0 (Fast Preview)' },
+                    { value: 'veo-2.0-generate-001', label: 'VEO 2.0 (Stable)' },
+                ]}
+            />
           
-            <ImageUploader files={imageFiles} onFilesChange={handleFilesChange} maxFiles={1} />
+            <ImageUploader files={imageFiles} onFilesChange={handleFilesChange} maxFiles={1} label={t('initialImageLabel')} />
             
             <div className="space-y-4">
                 <h3 className="text-sm font-semibold text-gray-400">{t('scenesTitle')}</h3>
@@ -322,20 +309,19 @@ const VideoGenerator: React.FC = () => {
                         ]}
                     />
                 </div>
-                {isVeo3 && (
-                    <RadioButtonGroup<CharacterVoice>
-                        label={t('characterVoiceLabel')}
-                        name="character-voice"
-                        value={characterVoice}
-                        onChange={setCharacterVoice}
-                        options={[
-                            { value: 'none', label: t('voiceNone') },
-                            { value: 'english', label: t('voiceEnglish') },
-                            { value: 'bahasa-indonesia', label: t('voiceIndonesian') },
-                        ]}
-                    />
-                )}
                 <ToggleSwitch label={t('enableSoundLabel')} enabled={enableSound} onChange={setEnableSound} disabled={veoModel === 'veo-2.0-generate-001'} />
+                {veoModel === 'veo-3.0-fast-generate-preview' && enableSound && (
+                  <SelectInput<CharacterVoice> 
+                      label={t('characterVoiceLabel')}
+                      value={characterVoice}
+                      onChange={setCharacterVoice}
+                      options={[
+                          { value: 'none', label: t('voiceNone') },
+                          { value: 'english', label: t('voiceEnglish') },
+                          { value: 'bahasa-indonesia', label: t('voiceIndonesian') },
+                      ]}
+                  />
+                )}
             </div>
 
           </fieldset>
@@ -362,10 +348,8 @@ const VideoGenerator: React.FC = () => {
                   </Button>
               ) : (
                   <Button 
-                    type="submit" 
-                    disabled={!isApiKeySet || scenes.some(s => !s.prompt.trim())} 
+                    type="submit"
                     className="w-full text-lg"
-                    title={!isApiKeySet ? t('apiKeyMissingError') : ''}
                   >
                       {t('generateVideoButton')} ({scenes.length} {scenes.length > 1 ? 'Scenes' : 'Scene'})
                   </Button>

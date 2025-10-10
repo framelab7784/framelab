@@ -8,6 +8,8 @@ import SelectInput from './SelectInput';
 import TextAreaInput from './TextAreaInput';
 import Button from './Button';
 import { Spinner } from './Spinner';
+import { DownloadIcon, MagnifyingGlassIcon } from './icons';
+import { ImagePreviewModal } from './ImagePreviewModal';
 
 const fileToImageInput = (file: File): Promise<ImageInput> => {
   return new Promise((resolve, reject) => {
@@ -36,6 +38,7 @@ export const ImageEdit: React.FC = () => {
   const [editedImage, setEditedImage] = useState<ImageInput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
 
   const isEditingMode = imageModel === 'gemini-2.5-flash-image';
 
@@ -71,6 +74,16 @@ export const ImageEdit: React.FC = () => {
     setIsLoading(false);
   }, []);
 
+  const handleDownload = useCallback(() => {
+    if (!editedImage) return;
+    const link = document.createElement('a');
+    link.href = `data:${editedImage.mimeType};base64,${editedImage.data}`;
+    link.download = `frame-lab-edited-image.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }, [editedImage]);
+
   const handleSubmit = async () => {
     if (!isApiKeySet || !prompt.trim() || (isEditingMode && !originalImage)) {
         setError(t('apiKeyMissingError')); // Or a more specific error
@@ -98,21 +111,43 @@ export const ImageEdit: React.FC = () => {
   };
 
 
-  const ResultPanel = ({ title, image, placeholderText, isLoading = false }: { title: string, image: ImageInput | null, placeholderText: string, isLoading?: boolean }) => (
+  const ResultPanel = ({ title, image, placeholderText, isLoading = false, showActions = false, onPreview, onDownload }: { title: string, image: ImageInput | null, placeholderText: string, isLoading?: boolean, showActions?: boolean, onPreview?: () => void, onDownload?: () => void }) => (
     <div className="bg-gray-800/50 rounded-lg p-3 flex flex-col h-full">
         <h2 className="text-center font-semibold text-gray-400 text-sm mb-2">{title}</h2>
-        <div className="flex-grow bg-black rounded-md flex items-center justify-center relative aspect-square">
+        <div className="flex-grow bg-black rounded-md flex items-center justify-center relative aspect-square group">
             {isLoading ? (
                  <div className="flex flex-col items-center justify-center text-gray-400">
                     <Spinner className="h-8 w-8"/>
                     <p className="mt-2 text-sm">{t('generatingSceneShort')}</p>
                 </div>
             ) : image ? (
-                <img 
-                    src={`data:${image.mimeType};base64,${image.data}`} 
-                    alt={title}
-                    className="max-w-full max-h-full object-contain"
-                />
+                <>
+                    <img 
+                        src={`data:${image.mimeType};base64,${image.data}`} 
+                        alt={title}
+                        className="max-w-full max-h-full object-contain"
+                    />
+                    {showActions && (
+                       <>
+                         <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-md">
+                            <button
+                                onClick={onPreview}
+                                className="bg-lime-500 text-gray-900 font-semibold py-2 px-4 rounded-lg flex items-center justify-center gap-2 hover:bg-lime-400 transition-all duration-300"
+                            >
+                                <MagnifyingGlassIcon className="w-5 h-5" />
+                                {t('preview')}
+                            </button>
+                        </div>
+                        <button
+                            onClick={onDownload}
+                            className="absolute bottom-3 right-3 bg-lime-500 text-gray-900 font-semibold py-2 px-4 rounded-lg flex items-center justify-center gap-2 hover:bg-lime-400 transition-all duration-300"
+                        >
+                            <DownloadIcon className="w-5 h-5" />
+                            {t('download')}
+                        </button>
+                      </>
+                    )}
+                </>
             ) : (
                 <div className="text-center text-gray-600 p-4">
                      <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-12 w-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19 14.5M14.25 3.104c.251.023.501.05.75.082M19 14.5v5.25c0 .621-.504 1.125-1.125 1.125H6.125c-.621 0-1.125-.504-1.125-1.125V14.5m14-11.396c.251.023.501.05.75.082M4.5 5.438a24.301 24.301 0 014.5 0m0 0v5.714a2.25 2.25 0 00.659 1.591L14.25 14.5" /></svg>
@@ -221,10 +256,19 @@ export const ImageEdit: React.FC = () => {
                     image={editedImage}
                     placeholderText={isEditingMode ? t('editedImagePlaceholder') : t('generatedImagePlaceholder')}
                     isLoading={isLoading}
+                    showActions={!!editedImage && !isLoading}
+                    onPreview={() => setIsPreviewOpen(true)}
+                    onDownload={handleDownload}
                 />
              </div>
         </div>
       </main>
+
+      <ImagePreviewModal 
+        isOpen={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
+        imageUrl={editedImage ? `data:${editedImage.mimeType};base64,${editedImage.data}` : null}
+      />
     </div>
   );
 };

@@ -25,12 +25,40 @@ const AuthModal: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [message, setMessage] = useState<string | null>(null);
+    const [formErrors, setFormErrors] = useState<{ email?: string; password?: string }>({});
+
+
+    const validateForm = () => {
+        const errors: { email?: string; password?: string } = {};
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!email.trim()) {
+            errors.email = t('emailRequired');
+        } else if (!emailRegex.test(email)) {
+            errors.email = t('emailInvalid');
+        }
+
+        if (!password) {
+            errors.password = t('passwordRequired');
+        } else if (password.length < 6) {
+            errors.password = t('passwordMinLength');
+        }
+
+        setFormErrors(errors);
+        return Object.keys(errors).length === 0;
+    };
+
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setLoading(true);
         setError(null);
         setMessage(null);
+        
+        if (!validateForm()) {
+            return;
+        }
+
+        setLoading(true);
 
         try {
             if (mode === 'login') {
@@ -63,6 +91,7 @@ const AuthModal: React.FC = () => {
         setMode(newMode);
         setError(null);
         setMessage(null);
+        setFormErrors({});
         setEmail('');
         setPassword('');
     }
@@ -92,33 +121,39 @@ const AuthModal: React.FC = () => {
                     </button>
                 </div>
                 
-                <form className="space-y-6" onSubmit={handleSubmit}>
-                    <AuthInput
-                        id="email"
-                        label="Email"
-                        type="email"
-                        icon={<MailIcon className="h-5 w-5" />}
-                        placeholder="email@example.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                    />
-                    <AuthInput
-                        id="password"
-                        label="Password"
-                        type="password"
-                        icon={<LockIcon className="h-5 w-5" />}
-                        placeholder="••••••••"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        minLength={6}
-                    />
+                <form className="space-y-4" onSubmit={handleSubmit}>
+                    <div>
+                        <AuthInput
+                            id="email"
+                            label="Email"
+                            type="email"
+                            icon={<MailIcon className="h-5 w-5" />}
+                            placeholder="email@example.com"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
+                        {formErrors.email && <p className="text-xs text-red-400 mt-1 pl-1">{formErrors.email}</p>}
+                    </div>
+                     <div>
+                        <AuthInput
+                            id="password"
+                            label="Password"
+                            type="password"
+                            icon={<LockIcon className="h-5 w-5" />}
+                            placeholder="••••••••"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            minLength={6}
+                        />
+                        {formErrors.password && <p className="text-xs text-red-400 mt-1 pl-1">{formErrors.password}</p>}
+                    </div>
 
                     {error && <p className="text-xs text-center text-red-400 bg-red-900/30 p-2 rounded-md">{error}</p>}
                     {message && <p className="text-xs text-center text-green-400 bg-green-900/30 p-2 rounded-md">{message}</p>}
 
-                    <div>
+                    <div className="pt-2">
                         <button
                             type="submit"
                             disabled={loading}

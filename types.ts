@@ -24,7 +24,7 @@ export type PhotoshootResult =
   | { status: 'rejected'; reason: any };
 
 // New types for Video Generator
-export type VeoModel = 'veo-3.0-generate-preview' | 'veo-3.0-generate-001' | 'veo-3.0-fast-generate-001' | 'veo-2.0-generate-001';
+export type VeoModel = 'veo-3.0-fast-generate-preview' | 'veo-2.0-generate-001';
 export type AspectRatio = '16:9' | '9:16';
 export type Resolution = '1080p' | '720p';
 export type VisualStyle = 'Cinematic' | 'Realistic' | 'Anime' | 'Pixar3D' | 'Cyberpunk' | "Retro 80's";

@@ -29,6 +29,7 @@ export const resources = {
   errorUnknown: { en: 'An unknown error occurred.', id: 'Terjadi kesalahan yang tidak diketahui.'},
   
   // VideoGenerator.tsx
+  initialImageLabel: { en: 'Initial Image (Optional)', id: 'Gambar Awal (Opsional)' },
   promptRequiredForSceneError: { en: 'A prompt is required for each scene.', id: 'Prompt diperlukan untuk setiap adegan.' },
   generationStoppedByUser: { en: 'Generation was stopped by the user.', id: 'Generasi dihentikan oleh pengguna.' },
   generationFailedError: { en: 'Generation failed:', id: 'Generasi gagal:' },
@@ -77,6 +78,8 @@ export const resources = {
   apiKeyTesting: { en: 'Testing key...', id: 'Menguji kunci...' },
   apiKeyValid: { en: 'API Key is valid!', id: 'Kunci API valid!' },
   apiKeyInvalid: { en: 'API Key is invalid or has insufficient permissions.', id: 'Kunci API tidak valid atau tidak memiliki izin yang cukup.' },
+  copyApiKeyButton: { en: 'Copy API Key', id: 'Salin Kunci API' },
+  apiKeyCopied: { en: 'Copied!', id: 'Disalin!' },
   
   // ImageEditor.tsx
   editImageSubTab: { en: 'Edit Image', id: 'Edit Gambar' },
@@ -114,5 +117,12 @@ export const resources = {
   promptIdeasAppearHere: { en: 'Your prompt ideas will appear here.', id: 'Ide prompt Anda akan muncul di sini.'},
   imageForPromptError: { en: 'Please upload an image to generate a prompt.', id: 'Silakan unggah gambar untuk menghasilkan prompt.' },
   descriptionForPromptError: { en: 'Please enter a description to generate a prompt.', id: 'Silakan masukkan deskripsi untuk menghasilkan prompt.' },
+
+  // AuthModal.tsx
+  emailRequired: { en: 'Email is required.', id: 'Email wajib diisi.' },
+  emailInvalid: { en: 'Please enter a valid email address.', id: 'Silakan masukkan alamat email yang valid.' },
+  passwordRequired: { en: 'Password is required.', id: 'Password wajib diisi.' },
+  passwordMinLength: { en: 'Password must be at least 6 characters long.', id: 'Password harus memiliki panjang minimal 6 karakter.' },
+
 
 } as const;

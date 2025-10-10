@@ -62,33 +62,44 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Efek ini HANYA berjalan sekali saat aplikasi pertama kali dimuat
   useEffect(() => {
     const checkInitialSession = async () => {
-      const { data: { session: initialSession } } = await supabase.auth.getSession();
-      
-      if (initialSession) {
-        const currentUser = initialSession.user;
-        const localSessionId = localStorage.getItem(SESSION_ID_STORAGE_KEY);
+      // FIX: Wrap session checking in a try...finally block.
+      // This ensures that setLoading(false) is always called, even if an error occurs during the
+      // async session verification process. This prevents the app from getting stuck on the
+      // initial loading screen if, for example, a network request to Supabase fails.
+      try {
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
+        
+        if (initialSession) {
+          const currentUser = initialSession.user;
+          const localSessionId = localStorage.getItem(SESSION_ID_STORAGE_KEY);
 
-        if (!localSessionId) {
-          await logout(true);
-          setLoading(false);
-          return;
+          if (!localSessionId) {
+            await logout(true);
+            return;
+          }
+
+          const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('is_active, active_session_id')
+            .eq('id', currentUser.id)
+            .limit(1)
+            .single();
+
+          if (error || !profile?.is_active || profile.active_session_id !== localSessionId) {
+            await logout(true);
+          } else {
+            setSession(initialSession);
+            setUser(currentUser);
+          }
         }
-
-        const { data: profile, error } = await supabase
-          .from('profiles')
-          .select('is_active, active_session_id')
-          .eq('id', currentUser.id)
-          .limit(1)
-          .single();
-
-        if (error || !profile?.is_active || profile.active_session_id !== localSessionId) {
-          await logout(true);
-        } else {
-          setSession(initialSession);
-          setUser(currentUser);
-        }
+      } catch (e) {
+        // If any error occurs during session validation, log it and ensure the user is logged out.
+        console.error("Error during initial session check:", e);
+        await logout(true);
+      } finally {
+        // Always set loading to false after the check is complete.
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     checkInitialSession();
